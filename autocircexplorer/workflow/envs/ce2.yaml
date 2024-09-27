@@ -1,0 +1,7 @@
+name: circexplorer2
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - circexplorer2

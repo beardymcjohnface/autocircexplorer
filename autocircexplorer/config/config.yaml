@@ -1,0 +1,23 @@
+# Namespaced config file example
+autocircexplorer:
+    args: # Command line args will be (over)written here at runtime
+        input1:
+        input2:
+        ref:
+        output:
+    # Add customisable config here
+    starparams: --chimSegmentMin 10
+    rmats:
+        count: JC # or JCEC
+        outfiles:
+            jc: ["A3SS.MATS.JC.txt","A5SS.MATS.JC.txt","MXE.MATS.JC.txt","RI.MATS.JC.txt","SE.MATS.JC.txt"]
+            jcec: ["A3SS.MATS.JCEC.txt","A5SS.MATS.JCEC.txt","MXE.MATS.JCEC.txt","RI.MATS.JCEC.txt","SE.MATS.JCEC.txt"]
+    resources:
+        big:
+            cpu: 20
+            mem_mb: 128000
+            time: 1440
+        small:
+            cpu: 1
+            mem_mb: 16000
+            time: 1440

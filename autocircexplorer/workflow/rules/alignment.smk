@@ -1,0 +1,58 @@
+rule star_align:
+    input:
+        ref = config["args"]["ref"],
+        r1=lambda wildcards: samples["reads"][wildcards.sample]["R1"],
+    output:
+        bam = os.path.join(dirs["results"], "star", "{sample}.bam"),
+        out = expand(
+            os.path.join(dirs["results"], "star", "{{sample}}.{file}"),
+            file=[
+                "Chimeric.out.junction",
+                "Log.out",
+                "Log.final.out",
+                "Log.progress.out",
+                "Log.std.out",
+                "SJ.out.tab"]
+            )
+    threads:
+        config["resources"]["big"]["cpu"]
+    resources:
+        mem_mb = config["resources"]["big"]["mem_mb"],
+        time = config["resources"]["big"]["time"]
+    params:
+        star = config["starparams"],
+        prefix = os.path.join(dirs["results"], "star", "{sample}."),
+        r2 = lambda wildcards: samples["reads"][wildcards.sample]["R2"] if samples["reads"][wildcards.sample]["R2"] else "",
+        readcmd = lambda wildcards: "zcat" if samples["reads"][wildcards.sample]["R1"].endswith(".gz") else "cat"
+    conda:
+        os.path.join(dirs["envs"], "star.yaml")
+    benchmark:
+        os.path.join(dirs["bench"], "star_align.{sample}.txt")
+    log:
+        os.path.join(dirs["logs"], "star_align.{sample}.err")
+    shell:
+        """
+        STAR {params.star} \
+            --runThreadN {threads} \
+            --genomeDir {input.ref} \
+            --readFilesCommand {params.readcmd} \
+            --outStd SAM \
+            --outFileNamePrefix {params.prefix} \
+            --readFilesIn {input.r1} {params.r2} \
+        | samtools sort -@ {threads} -m 1G \
+        > {output.bam}
+        """
+
+rule parse_star:
+    input:
+        os.path.join(dirs["results"], "star", "{sample}.Chimeric.out.junction")
+    output:
+        os.path.join(dirs["results"], "ce2", "{sample}.circexplorer2.parse")
+    conda:
+        os.path.join(dirs["envs"], "ce2.yaml")
+    benchmark:
+        os.path.join(dirs["bench"], "parse_star.{sample}.txt")
+    log:
+        os.path.join(dirs["logs"], "parse_star.{sample}.err")
+    shell:
+        "CIRCexplorer2 parse -t STAR {input} -b {output} > {log}"

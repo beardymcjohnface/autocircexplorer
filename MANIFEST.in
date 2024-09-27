@@ -1,0 +1,4 @@
+include autocircexplorer/autocircexplorer.LICENSE
+include autocircexplorer/autocircexplorer.CITATION
+include autocircexplorer/autocircexplorer.VERSION
+recursive-include autocircexplorer *
