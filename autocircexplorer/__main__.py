@@ -92,7 +92,8 @@ def common_options(func):
                 "--printshellcmds",
                 "--nolock",
                 "--show-failed-logs",
-                "--use-singularity"
+                "--use-singularity",
+                "--singularity-args \"-B `pwd`\""
             ],
             help="Customise Snakemake runtime args",
             show_default=True,
@@ -157,6 +158,7 @@ Available targets:
 @click.option("--input2", help="Input file/directory sample group 2", type=str, required=False)
 @click.option("--ref", help="STAR reference directory", type=str, required=True)
 @click.option("--gtf", help="Reference GTF file", type=str, required=True)
+@click.option("--fa", help="Reference FASTA file", type=str, required=True)
 @click.option("--readlen", help="Read length", type=int, required=True, default=150)
 @common_options
 def run(**kwargs):

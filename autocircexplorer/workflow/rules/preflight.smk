@@ -19,9 +19,9 @@ samples = dict()
 
 if config["args"]["input2"]:
     samples["reads"] = fastq_finder.parse_samples_to_dictionary(config["args"]["input2"])
-    samples["group2"] = list(samples["reads"].keys())
+    samples["group2"] = sorted(list(samples["reads"].keys()))
     samples["reads"].update(fastq_finder.parse_samples_to_dictionary(config["args"]["input1"]))
-    samples["group1"] = list(set(samples["reads"].keys()) - set(samples["group2"]))
+    samples["group1"] = sorted(list(set(samples["reads"].keys()) - set(samples["group2"])))
 else:
     samples["reads"] = fastq_finder.parse_samples_to_dictionary(config["args"]["input1"])
     samples["group1"] = []
@@ -30,28 +30,56 @@ else:
 samples["names"] = list(samples["reads"].keys())
 
 
+# MISC
+config["bwa_index"] = expand(
+    config["args"]["ref"] + "{suffix}",
+    suffix=[""])
+
 # Targets
-targets = [
+targets = dict()
+targets["star"] = [
     expand(
-        os.path.join(dirs["results"], "star", "{sample}.bam"),
-        sample=samples["names"]
-    ),
+        os.path.join(dirs["results"], "star", "{sample}.{bam}"),
+        sample=samples["names"],
+        bam=["bam","bam.bai"]
+    )
+]
+
+targets["salmon"] = [
     expand(
-        os.path.join(dirs["results"], "ce2", "{sample}.circexplorer2.parse"),
+        os.path.join(dirs["results"], "salmon", "{sample}", "quant.sf"),
         sample=samples["names"]
     )
 ]
 
+targets["ce2"] = [
+    expand(
+        os.path.join(dirs["results"], "ce2", "{sample}.circexplorer2.{step}"),
+        sample=samples["names"],
+        step = ["parse", "annotated"]
+    ),
+    os.path.join(dirs["results"], "lib.counts.tsv"),
+    os.path.join(dirs["results"], "ce2", "refFlatFile.txt")
+]
+
+targets["ciri2"] = expand(
+    os.path.join(dirs["results"], "ciri2", "{sample}.ciri2"),
+    sample=samples["names"]
+)
+
 if config["args"]["input2"]:
-    targets.append(os.path.join(dirs["results"], "rmats_multi_summary_long.tsv"))
-else:
-    targets.append(
-        expand(
-            os.path.join(dirs["results"], "{event}.{count}.csv.gz"),
-            event=["A3SS","A5SS","MXE","RI","SE"],
-            count=["skip","inclusion"]
-        ),
+    targets["rmats"] = expand(
+        os.path.join(dirs["results"], "{file}.{count}.tsv"),
+        file=["A3SS", "A5SS", "MXE", "RI", "SE"],
+        count=["raw","CPM"]
     )
+else:
+    targets["rmats"] = expand(
+        os.path.join(dirs["results"], "{event}.{count}.csv.gz"),
+        event=["A3SS","A5SS","MXE","RI","SE"],
+        count=["skip","inclusion"]
+    )
+
 
 
 # Misc

@@ -46,7 +46,7 @@ rule rmats_single:
 
 rule rmats_single_combine:
     input:
-        expand(
+        rmats_out = expand(
             os.path.join(dirs["results"], "rmats", "{sample}.rmats_single", "{file}"),
             sample=samples["names"],
             file=config["rmats"]["outfiles"]["jc"] + config["rmats"]["outfiles"]["jcec"]
@@ -59,7 +59,8 @@ rule rmats_single_combine:
             count=["skip","inclusion"]
         )
     params:
-        outpath = dirs["results"]
+        outpath = dirs["results"],
+        mode = "single"
     log:
         os.path.join(dirs["logs"], "rmats_single_combine.log")
     script:
@@ -75,7 +76,7 @@ rule rmats_multi_sample_files:
         g2 = os.path.join(dirs["results"], "rmats", "group2.txt")
     params:
         g1 = ",".join(expand(os.path.join(dirs["results"], "star", "{sample}.bam"), sample=samples["group1"])),
-        g2 = ",".join(expand(os.path.join(dirs["results"], "star", "{sample}.bam"), sample=samples["group2"])),
+        g2 = ",".join(expand(os.path.join(dirs["results"], "star", "{sample}.bam"), sample=samples["group2"]))
     shell:
         """
         echo {params.g1} > {output.g1}
@@ -90,8 +91,12 @@ rule rmats_multi:
         b2 = os.path.join(dirs["results"], "rmats", "group2.txt"),
         gtf = config["args"]["gtf"]
     output:
-        directory(os.path.join(dirs["results"], "rmats", "rmats_multi"))
+        expand(
+            os.path.join(dirs["results"], "rmats", "rmats_multi", "{file}"),
+            file=config["rmats"]["outfiles"]["jc"] + config["rmats"]["outfiles"]["jcec"]
+        )
     params:
+        dir = os.path.join(dirs["results"], "rmats", "rmats_multi"),
         paired = lambda w: "paired" if samples["reads"][samples["names"][0]]["R2"] else "single",
         readlen = config["args"]["readlen"],
         tmpdir = os.path.join(dirs["results"], "rmats", "rmats_multi_tmp")
@@ -109,9 +114,61 @@ rule rmats_multi:
             --gtf {input.gtf} \
             -t {params.paired} \
             --readLength {params.readlen} \
+            --variable-read-length \
             --nthread {threads} \
-            --od {output} \
+            --od {params.dir} \
             --tmp {params.tmpdir} \
-            2> {log}
+            --allow-clipping \
+            &> {log}
         rm -r {params.tmpdir}
         """
+
+
+rule rmats_multi_combine:
+    input:
+        rmats_out = expand(
+            os.path.join(dirs["results"], "rmats", "rmats_multi", "{file}"),
+            file=config["rmats"]["outfiles"]["jc"] + config["rmats"]["outfiles"]["jcec"]),
+        lib = os.path.join(dirs["results"], "lib.counts.tsv")
+    output:
+        expand(os.path.join(dirs["results"], "{file}.{count}.tsv"),
+            file=["A3SS", "A5SS", "MXE", "RI", "SE"],
+            count=["raw","CPM"])
+    params:
+        outpath = os.path.join(dirs["results"],"rmats", "rmats_multi"),
+        respath = dirs["results"],
+        mode = "multi",
+        type = config["rmats"]["count"],
+        s1 = samples["group1"],
+        s2 = samples["group2"]
+    log:
+        os.path.join(dirs["logs"], "rmats_multi_combine.log")
+    script:
+        os.path.join(dirs["scripts"], "rmats_combine.py")
+
+
+rule lib_count:
+    input:
+        r1=lambda wildcards: samples["reads"][wildcards.sample]["R1"],
+    params:
+        r2 = lambda wildcards: samples["reads"][wildcards.sample]["R2"] if samples["reads"][wildcards.sample]["R2"] else "",
+        cat = lambda wildcards: "zcat" if samples["reads"][wildcards.sample]["R1"].endswith(".gz") else "cat"
+    output:
+        temp(os.path.join(dirs["results"], "{sample}.lib"))
+    shell:
+        """
+        {params.cat} {input.r1} {params.r2} | wc -l | awk '{{print "{wildcards.sample}\t" $1 / 4 }}' > {output}
+        """
+
+
+rule combine_lib_count:
+    input:
+        expand(
+        os.path.join(dirs["results"], "{sample}.lib"),
+        sample=samples["names"]
+    ),
+    output:
+        os.path.join(dirs["results"], "lib.counts.tsv")
+    shell:
+        "cat {input} > {output}"
+

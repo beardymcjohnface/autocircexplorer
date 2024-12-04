@@ -43,16 +43,14 @@ rule star_align:
         > {output.bam}
         """
 
-rule parse_star:
+
+rule bam_index:
     input:
-        os.path.join(dirs["results"], "star", "{sample}.Chimeric.out.junction")
+        "{filepath}.bam"
     output:
-        os.path.join(dirs["results"], "ce2", "{sample}.circexplorer2.parse")
+        "{filepath}.bam.bai"
     conda:
-        os.path.join(dirs["envs"], "ce2.yaml")
-    benchmark:
-        os.path.join(dirs["bench"], "parse_star.{sample}.txt")
-    log:
-        os.path.join(dirs["logs"], "parse_star.{sample}.err")
+        os.path.join(dirs["envs"], "star.yaml")
     shell:
-        "CIRCexplorer2 parse -t STAR {input} -b {output} > {log}"
+        "samtools index {input} -o {output}"
+

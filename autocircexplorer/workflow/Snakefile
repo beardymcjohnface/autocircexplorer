@@ -9,13 +9,50 @@ config.update(config["autocircexplorer"]) # convenience if using namespaced conf
 include: os.path.join(workflow.basedir, "rules", "preflight.smk")
 include: os.path.join(workflow.basedir, "rules", "alignment.smk")
 include: os.path.join(workflow.basedir, "rules", "rmats.smk")
+include: os.path.join(workflow.basedir, "rules", "circexplorer2.smk")
+include: os.path.join(workflow.basedir, "rules", "ciri.smk")
+include: os.path.join(workflow.basedir, "rules", "salmon.smk")
+
 
 
 # Target rules
 @targetRule
 rule all:
     input:
-        targets
+        targets["star"],
+        targets["rmats"],
+        targets["ce2"],
+        targets["ciri2"]
+
+
+@targetRule
+rule star:
+    input:
+        targets["star"]
+
+
+@targetRule
+rule salmon:
+    input:
+        targets["salmon"]
+
+
+@targetRule
+rule rmats:
+    input:
+        targets["rmats"]
+
+
+@targetRule
+rule ce2:
+    input:
+        targets["ce2"]
+
+
+@targetRule
+rule ciri2:
+    input:
+        targets["ciri2"]
 
 
 @targetRule

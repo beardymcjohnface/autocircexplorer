@@ -4,6 +4,8 @@ autocircexplorer:
         input1:
         input2:
         ref:
+        gtf:
+        fa:
         output:
     # Add customisable config here
     starparams: --chimSegmentMin 10
