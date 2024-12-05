@@ -49,7 +49,9 @@ targets["salmon"] = [
     expand(
         os.path.join(dirs["results"], "salmon", "{sample}", "quant.sf"),
         sample=samples["names"]
-    )
+    ),
+    os.path.join(dirs["results"],"salmon","TPM.tsv"),
+    os.path.join(dirs["results"],"salmon","NumReads.tsv")
 ]
 
 targets["ce2"] = [

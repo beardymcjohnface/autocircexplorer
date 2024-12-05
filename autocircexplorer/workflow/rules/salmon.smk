@@ -1,3 +1,5 @@
+import os.path
+
 rule salmon_alignment:
     input:
         ref = config["args"]["ref"],
@@ -28,3 +30,23 @@ rule salmon_alignment:
             "-p {threads} "
             "-o {params.dir} "
             "2> {log}"
+
+
+rule combine_salmon:
+    input:
+        expand(os.path.join(dirs["results"],"salmon","{sample}","quant.sf"), sample=samples["names"])
+    output:
+        tpm = os.path.join(dirs["results"],"salmon","TPM.tsv"),
+        num = os.path.join(dirs["results"],"salmon","NumReads.tsv")
+    benchmark:
+        os.path.join(dirs["bench"], "combine_salmon.txt")
+    params:
+        samples = samples["names"],
+        dir = os.path.join(dirs["results"],"salmon"),
+        file = "quant.sf"
+    log:
+        os.path.join(dirs["logs"], "combine_salmon.err")
+    script:
+        os.path.join(dirs["scripts"], "combine_salmon.py")
+
+
