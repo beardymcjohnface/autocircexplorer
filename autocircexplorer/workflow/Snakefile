@@ -12,6 +12,7 @@ include: os.path.join(workflow.basedir, "rules", "rmats.smk")
 include: os.path.join(workflow.basedir, "rules", "circexplorer2.smk")
 include: os.path.join(workflow.basedir, "rules", "ciri.smk")
 include: os.path.join(workflow.basedir, "rules", "salmon.smk")
+include: os.path.join(workflow.basedir, "rules", "fastqc.smk")
 
 
 
@@ -53,6 +54,13 @@ rule ce2:
 rule ciri2:
     input:
         targets["ciri2"]
+
+
+@targetRule
+rule multiqc:
+    input:
+        targets["fastqc"],
+        os.path.join(dirs["results"],"multi_fastqc_report.html")
 
 
 @targetRule

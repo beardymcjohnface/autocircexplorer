@@ -1,4 +1,3 @@
-import glob
 import os
 
 from metasnek import fastq_finder, fasta_finder
@@ -82,6 +81,11 @@ else:
         count=["skip","inclusion"]
     )
 
+targets["fastqc"] = list()
+for sample in samples["names"]:
+    targets["fastqc"].append(os.path.join(dirs["results"], "fastqc", sample + "_R1_fastqc.zip"))
+    if samples["reads"][sample]["R2"]:
+        targets["fastqc"].append(os.path.join(dirs["results"],"fastqc",sample + "_R2_fastqc.zip"))
 
 
 # Misc
