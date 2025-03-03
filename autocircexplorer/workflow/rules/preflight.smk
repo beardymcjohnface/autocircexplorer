@@ -44,6 +44,13 @@ targets["star"] = [
     )
 ]
 
+targets["flagstat"] = [
+    expand(
+        os.path.join(dirs["results"], "multiqc", "{sample}.Log.final.out"),
+        sample=samples["names"]
+    )
+]
+
 targets["salmon"] = [
     expand(
         os.path.join(dirs["results"], "salmon", "{sample}", "quant.sf"),
@@ -83,9 +90,9 @@ else:
 
 targets["fastqc"] = list()
 for sample in samples["names"]:
-    targets["fastqc"].append(os.path.join(dirs["results"], "fastqc", sample + "_R1_fastqc.zip"))
+    targets["fastqc"].append(os.path.join(dirs["results"], "multiqc", sample + "_R1_fastqc.zip"))
     if samples["reads"][sample]["R2"]:
-        targets["fastqc"].append(os.path.join(dirs["results"],"fastqc",sample + "_R2_fastqc.zip"))
+        targets["fastqc"].append(os.path.join(dirs["results"],"multiqc",sample + "_R2_fastqc.zip"))
 
 
 # Misc

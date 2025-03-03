@@ -54,3 +54,14 @@ rule bam_index:
     shell:
         "samtools index {input} -o {output}"
 
+
+rule flagstat:
+    input:
+        os.path.join(dirs["results"], "star", "{sample}.Log.final.out")
+    output:
+        os.path.join(dirs["results"], "multiqc", "{sample}.Log.final.out")
+    conda:
+        os.path.join(dirs["envs"], "star.yaml")
+    shell:
+        "cp {input} {output}"
+

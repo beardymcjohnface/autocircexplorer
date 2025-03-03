@@ -20,7 +20,9 @@ include: os.path.join(workflow.basedir, "rules", "fastqc.smk")
 @targetRule
 rule all:
     input:
+        targets["fastqc"],
         targets["star"],
+        targets["flagstat"],
         targets["rmats"],
         targets["ce2"],
         targets["ciri2"]
@@ -29,7 +31,7 @@ rule all:
 @targetRule
 rule star:
     input:
-        targets["star"]
+        targets["star"],
 
 
 @targetRule
@@ -59,8 +61,7 @@ rule ciri2:
 @targetRule
 rule multiqc:
     input:
-        targets["fastqc"],
-        os.path.join(dirs["results"],"multi_fastqc_report.html")
+        os.path.join(dirs["results"],"multiqc_report.html")
 
 
 @targetRule
