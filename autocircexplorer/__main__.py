@@ -144,6 +144,12 @@ Add Snakemake args: autoce2 run ... --dry-run --keep-going --touch
 Specify targets:    autoce2 run ... all print_targets
 Available targets:
     all             Run everything (default)
+    star            Align with STAR
+    salmon          Count with salmon
+    rmats           Run rmats-turbo
+    ce2             Run circexplorer2
+    ciri2           Run CIRI2
+    multiqc         Make QC of rawreads and STAR alignments
     print_targets   List available targets
 """
 
