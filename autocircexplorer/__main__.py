@@ -156,10 +156,10 @@ Available targets:
 )
 @click.option("--input1", help="Input file/directory sample group 1", type=str, required=True)
 @click.option("--input2", help="Input file/directory sample group 2", type=str, required=False)
-@click.option("--ref", help="STAR reference directory", type=str, required=True)
-@click.option("--gtf", help="Reference GTF file", type=str, required=True)
-@click.option("--fa", help="Reference FASTA file", type=str, required=True)
-@click.option("--readlen", help="Read length", type=int, required=True, default=150)
+@click.option("--ref", help="STAR reference directory", type=str, required=False)
+@click.option("--gtf", help="Reference GTF file", type=str, required=False)
+@click.option("--fa", help="Reference FASTA file", type=str, required=False)
+@click.option("--readlen", help="Read length", type=int, required=False, default=150)
 @common_options
 def run(**kwargs):
     """Run autoCircExplorer"""

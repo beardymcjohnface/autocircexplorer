@@ -29,11 +29,6 @@ else:
 samples["names"] = list(samples["reads"].keys())
 
 
-# MISC
-config["bwa_index"] = expand(
-    config["args"]["ref"] + "{suffix}",
-    suffix=[""])
-
 # Targets
 targets = dict()
 targets["star"] = [

@@ -27,7 +27,8 @@ Make sure your sequencing reads are all in one directory, or pass a sample.tsv f
 autoce2 run \
     --input1 fastqDir/ \
     --ref starRefDir/ \
-    --gtf refGenes.gtf
+    --gtf refGenes.gtf \
+    rmats
 ```
 
 __Compare two groups__
@@ -39,5 +40,20 @@ autoce2 run \
     --input1 group1Fastq/ \
     --input2 group2Fastq/ \
     --ref starRefDir/ \
-    --gtf refGenes.gtf
+    --gtf refGenes.gtf \
+    rmats
+```
+
+## Run circexplorer2 and ciri2
+
+ciri2 needs: `--fa`
+circexplorer2 needs: `--fa`, `--gtf`, and `--ref`
+
+```shell
+autoce2 run \
+    --input1 fastq/ \
+    --fa genome.fasta \
+    --gtf genes.gtf \
+    --ref star_index/ \
+    ciri2 ce2
 ```
