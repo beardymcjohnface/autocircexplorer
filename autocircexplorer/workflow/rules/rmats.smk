@@ -35,6 +35,7 @@ rule rmats_single:
             --statoff \
             --gtf {input.gtf} \
             -t {params.paired} \
+            --novelSS \
             --readLength {params.readlen} \
             --nthread {threads} \
             --od {output.dir} \
@@ -115,6 +116,7 @@ rule rmats_multi:
             -t {params.paired} \
             --readLength {params.readlen} \
             --variable-read-length \
+            --novelSS \
             --nthread {threads} \
             --od {params.dir} \
             --tmp {params.tmpdir} \
@@ -131,7 +133,8 @@ rule rmats_multi_combine:
             file=config["rmats"]["outfiles"]["jc"] + config["rmats"]["outfiles"]["jcec"]),
         lib = os.path.join(dirs["results"], "lib.counts.tsv")
     output:
-        expand(os.path.join(dirs["results"], "{file}.{count}.tsv"),
+        long = os.path.join(dirs["results"],"rmats_multi_summary_long.csv.gz"),
+        counts = expand(os.path.join(dirs["results"], "{file}.{count}.tsv"),
             file=["A3SS", "A5SS", "MXE", "RI", "SE"],
             count=["raw","CPM"])
     params:

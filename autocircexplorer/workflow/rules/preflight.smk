@@ -76,11 +76,14 @@ targets["ciri2"] = expand(
 )
 
 if config["args"]["input2"]:
-    targets["rmats"] = expand(
-        os.path.join(dirs["results"], "{file}.{count}.tsv"),
-        file=["A3SS", "A5SS", "MXE", "RI", "SE"],
-        count=["raw","CPM"]
-    )
+    targets["rmats"] = [
+        expand(
+            os.path.join(dirs["results"], "{file}.{count}.tsv"),
+            file=["A3SS", "A5SS", "MXE", "RI", "SE"],
+            count=["raw","CPM"]
+        ),
+        os.path.join(dirs["results"],"rmats_multi_summary_long.csv.gz")
+    ]
 else:
     targets["rmats"] = expand(
         os.path.join(dirs["results"], "{event}.{count}.csv.gz"),
@@ -99,6 +102,7 @@ for sample in samples["names"]:
 target_rules = []
 
 
+
 def targetRule(fn):
     """Mark rules as target rules for rule print_targets"""
     assert fn.__name__.startswith("__")
@@ -110,10 +114,21 @@ def copy_log_file():
     """Concatenate Snakemake log to output log file"""
     import glob
 
+    def rename_file_if_exists(basename, counter):
+        if counter==0:
+            exist_file = basename
+        else:
+            exist_file = basename + '.' + str(counter)
+        if os.path.exists(exist_file):
+            rename_file_if_exists(basename,counter + 1)
+            os.rename(exist_file,basename + '.' + str(counter + 1))
+
+    if os.path.exists(config["args"]["log"]):
+        rename_file_if_exists(config["args"]["log"], 0)
     files = glob.glob(os.path.join(".snakemake", "log", "*.snakemake.log"))
     if files:
         current_log = max(files, key=os.path.getmtime)
-        shell("cat " + current_log + " >> " + config["args"]["log"])
+        shell("cat " + current_log + " > " + config["args"]["log"])
 
 
 onsuccess:

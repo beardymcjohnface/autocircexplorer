@@ -67,36 +67,41 @@ def collect_rmats_multi_out(snakemake):
     for i in ["A3SS", "A5SS", "MXE", "RI", "SE"]:
         df = pd.read_table(os.path.join(snakemake.params.outpath, i + ".MATS." + snakemake.params.type + ".txt"))
 
-        df[[ "S1.IJC." + x for x in snakemake.params.s1 ]] = df["IJC_SAMPLE_1"].str.split(",", expand=True)
-        df[[ "S2.IJC." + x for x in snakemake.params.s2 ]] = df["IJC_SAMPLE_2"].str.split(",", expand=True)
-        df[[ "S1.SJC." + x for x in snakemake.params.s1 ]] = df["SJC_SAMPLE_1"].str.split(",", expand=True)
-        df[[ "S2.SJC." + x for x in snakemake.params.s2 ]] = df["SJC_SAMPLE_2"].str.split(",", expand=True)
+        df[[ "S1:IJC:" + x for x in snakemake.params.s1 ]] = df["IJC_SAMPLE_1"].str.split(",", expand=True)
+        df[[ "S2:IJC:" + x for x in snakemake.params.s2 ]] = df["IJC_SAMPLE_2"].str.split(",", expand=True)
+        df[[ "S1:SJC:" + x for x in snakemake.params.s1 ]] = df["SJC_SAMPLE_1"].str.split(",", expand=True)
+        df[[ "S2:SJC:" + x for x in snakemake.params.s2 ]] = df["SJC_SAMPLE_2"].str.split(",", expand=True)
 
         df.drop(columns=["IJC_SAMPLE_1", "IJC_SAMPLE_2", "SJC_SAMPLE_1", "SJC_SAMPLE_2"], inplace=True)
 
         df.to_csv(os.path.join(snakemake.params.respath, i + ".raw.tsv"), sep='\t', index=False, float_format='%.6f')
 
+        cols_for_long_output = list()
+
         for sample in snakemake.params.s1:
-            df["S1.IJC." + sample] = (pd.to_numeric(df["S1.IJC." + sample]) / libcounts[sample]) * 1000000
-            df["S1.SJC." + sample] = (pd.to_numeric(df["S1.SJC." + sample]) / libcounts[sample]) * 1000000
+            cols_for_long_output.append("S1:IJC:" + sample)
+            cols_for_long_output.append("S1:SJC:" + sample)
+            df["S1:IJC:" + sample] = (pd.to_numeric(df["S1:IJC:" + sample]) / libcounts[sample]) * 1000000
+            df["S1:SJC:" + sample] = (pd.to_numeric(df["S1:SJC:" + sample]) / libcounts[sample]) * 1000000
 
         for sample in snakemake.params.s2:
-            df["S2.IJC." + sample] = (pd.to_numeric(df["S2.IJC." + sample]) / libcounts[sample]) * 1000000
-            df["S2.SJC." + sample] = (pd.to_numeric(df["S2.SJC." + sample]) / libcounts[sample]) * 1000000
+            cols_for_long_output.append("S2:IJC:" + sample)
+            cols_for_long_output.append("S2:SJC:" + sample)
+            df["S2:IJC:" + sample] = (pd.to_numeric(df["S2:IJC:" + sample]) / libcounts[sample]) * 1000000
+            df["S2:SJC:" + sample] = (pd.to_numeric(df["S2:SJC:" + sample]) / libcounts[sample]) * 1000000
 
         df.to_csv(os.path.join(snakemake.params.respath, i + ".CPM.tsv"), sep='\t', index=False, float_format='%.6f')
 
-        # for col_name in ["IJC_SAMPLE_1", "IJC_SAMPLE_2", "SJC_SAMPLE_1", "SJC_SAMPLE_2"]:
-        #     df_out = df[["ID",col_name]]
-        #     sample_names = snakemake.params.s1 if col_name.endswith("1") else snakemake.params.s2
-        #     df_out[[ x for x in sample_names ]] = df_out[col_name].str.split(",", expand=True)
-        #     df_out = pd.melt(df_out, id_vars="ID", value_vars=sample_names, var_name="Sample", value_name="count")
-        #     sample_group = "1" if col_name.endswith("1") else "2"
-        #     count_type = "IJC" if col_name.startswith("IJC") else "SJC"
-        #     df_out["sample_group"] = sample_group
-        #     df_out["count_type"] = count_type
-        #     df_out["event"] = i
-        #     yield df_out
+        for col_name in cols_for_long_output:
+            df_out = df[["ID", col_name]]
+            df_out.rename(columns={col_name: "CPM"}, inplace=True)
+            sample_group, sample_type, sample_name = col_name.split(":")
+            df_out["ID"] = df_out["ID"].astype(str) + ":" + sample_type
+            df_out["Sample"] = sample_name
+            df_out["Group"] = sample_group
+            df_out["Type"] = sample_type
+            df_out["Event"] = i
+            yield df_out[["ID", "Sample", "Group", "Type", "Event", "CPM"]]
 
 
 def event_wide_counts(df, event_type):
@@ -143,13 +148,13 @@ def main(snakemake):
 
     else:
         logging.debug("Reading in RMATS output files")
-        collect_rmats_multi_out(snakemake)
+        all_outs = collect_rmats_multi_out(snakemake)
 
-        # logging.debug("Combining RMATS outputs")
-        # combined_all_outs = pd.concat(all_outs)
+        logging.debug("Combining RMATS outputs")
+        combined_all_outs = pd.concat(all_outs)
 
-        # logging.debug("Writing long output")
-        # combined_all_outs.to_csv(snakemake.output.long, index=False, compression={"method": "gzip", "compresslevel": 1, "mtime": 1})
+        logging.debug("Writing long output")
+        combined_all_outs.to_csv(snakemake.output.long, index=False, compression={"method": "gzip", "compresslevel": 1, "mtime": 1})
 
 
 
