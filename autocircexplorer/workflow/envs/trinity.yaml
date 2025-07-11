@@ -1,9 +1,7 @@
-name: star
+name: trinity
 channels:
     - conda-forge
     - bioconda
     - defaults
 dependencies:
-    - star
-    - samtools
-    - subread
+    - trinity

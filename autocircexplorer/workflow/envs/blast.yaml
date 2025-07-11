@@ -1,9 +1,7 @@
-name: star
+name: blast
 channels:
     - conda-forge
     - bioconda
     - defaults
 dependencies:
-    - star
-    - samtools
-    - subread
+    - blast

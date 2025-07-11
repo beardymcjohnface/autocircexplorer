@@ -9,6 +9,8 @@ autocircexplorer:
         output:
     # Add customisable config here
     starparams: --chimSegmentMin 10
+    ciri2:
+        min_bsj_reads: 10
     rmats:
         count: JC # or JCEC
         outfiles:

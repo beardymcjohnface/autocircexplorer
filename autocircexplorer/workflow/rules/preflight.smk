@@ -93,6 +93,19 @@ for sample in samples["names"]:
         targets["fastqc"].append(os.path.join(dirs["results"],"multiqc",sample + "_R2_fastqc.zip"))
 
 
+targets["ciri2_bsj"] = [
+    expand(
+        os.path.join(dirs["results"],"ciri2","{sample}.reads.pkl"), sample = samples["names"]
+    # os.path.join(dirs["results"], "ciri2_bsj", sample + "reassembled.fasta")
+    ),
+    os.path.join(dirs["results"],"ciri2","bsj_reads.R1.trimmed.fastq"),
+    os.path.join(dirs["results"], "ciri2", "ref_bsj_seqs.fa"),
+    os.path.join(dirs["results"], "ciri2", "ref_bsj_blastn.outfmt6"),
+    os.path.join(dirs["results"],"ciri2","bsj_coords.tsv"),
+    os.path.join(dirs["results"],"ciri2","bsj_junction_seqs.fasta")
+    ]
+
+
 # Misc
 target_rules = []
 

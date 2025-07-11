@@ -1,3 +1,4 @@
+#from autocircexplorer.workflow.rules.preflight import targetRule
 
 # Update default config with runtime config
 configfile: os.path.join(workflow.basedir, "../", "config", "config.yaml")
@@ -13,10 +14,7 @@ include: os.path.join(workflow.basedir, "rules", "circexplorer2.smk")
 include: os.path.join(workflow.basedir, "rules", "ciri.smk")
 include: os.path.join(workflow.basedir, "rules", "salmon.smk")
 include: os.path.join(workflow.basedir, "rules", "fastqc.smk")
-
-
-# global container
-singularity: "docker://continuumio/miniconda3:4.4.10"
+include: os.path.join(workflow.basedir, "rules", "ciri2_bsj.smk")
 
 
 # Target rules
@@ -59,6 +57,12 @@ rule ce2:
 rule ciri2:
     input:
         targets["ciri2"]
+
+
+@targetRule
+rule ciri2_bsj:
+    input:
+        targets["ciri2_bsj"]
 
 
 @targetRule

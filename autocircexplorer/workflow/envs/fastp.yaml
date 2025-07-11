@@ -1,9 +1,7 @@
-name: star
+name: fastp
 channels:
     - conda-forge
     - bioconda
     - defaults
 dependencies:
-    - star
-    - samtools
-    - subread
+    - fastp
